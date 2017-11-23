@@ -9,9 +9,10 @@
 // (done)It should then fork and exec the command. 
 // (done)The parent process should wait until the exec'd program exits and 
 // (done)then it should read the next command.
-// Note: exit and cd cannot be run through a forked child process, 
-// you will have to implement these commands on your own.
+// (done)Note: exit and cd cannot be run through a forked child process, 
+// (done)you will have to implement these commands on your own.
 // (done)check out the chdir() function
+// done with 1st feature!!!
 
 char ** parse_args( char * line ){
     char ** output = (char**)calloc(15, sizeof("ugaediwbdhadkhwd"));
