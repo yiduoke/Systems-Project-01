@@ -14,6 +14,8 @@
 // (done)check out the chdir() function
 // done with 1st feature!!!
 
+// Read and separate multiple commands on one line with ; 
+
 char ** parse_args( char * line ){
     char ** output = (char**)calloc(15, sizeof("ugaediwbdhadkhwd"));
     int i=0;
