@@ -14,5 +14,5 @@
 // check out the chdir() function
 
 int main(int argc, char **argv){
-    execvp(argv[0], argv+1);
+    execvp(argv[1], argv+1);
 }
