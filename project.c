@@ -24,31 +24,45 @@ char ** parse_args( char * line ){
     return output;
 }
 
-int main(){
-    char* commands = (char*)calloc(30,10);//when in doubt, calloc is always the answer
-    //taking user input
-    printf("should be the current directory lol: ");
-    fgets(commands, 30, stdin); 
-    commands[strlen(commands)-1]=0;//taking out the new line by replacing it with null
-
-    char** parsed = (char**)calloc(3, 10);//yes
-    parsed = parse_args(commands);//parsing user input into commands and flags
-
-    //making the kid do the work
-    int mom = getpid();
-    int child = fork();
-    if (getpid() == mom){//if it's the parent
-        int status;
-        int childPID = wait(&status);
-        if (status){
-          printf("my son %d is done\n", WEXITSTATUS(status));// doesn't work except for
-          // the things that don't for this like exit and cd (works when it fails lol)
-          // is this supposed to happen
-        }
+static void sighandler(int signo){
+    if (signo == SIGINT){//keyboard interrupt
+        exit(0);
     }
-    else{//don't let the ! mislead you; this means it's a child
-        execvp(parsed[0], parsed);
-        return getpid();
+    else if (signo == SIGUSR1){//keyboard interrupt
+        printf("hello, my mom is %d\n", getppid());
+    }
+}
+
+int main(){
+    signal(SIGINT, sighandler);//whenever the SIGNIT gets sent, RUN this function
+    signal(SIGUSR1, sighandler);
+    while(1){
+        char* commands = (char*)calloc(30,10);//when in doubt, calloc is always the answer
+        //taking user input
+        printf("should be the current directory lol: ");
+        fgets(commands, 30, stdin); 
+        commands[strlen(commands)-1]=0;//taking out the new line by replacing it with null
+    
+        char** parsed = (char**)calloc(3, 10);//yes
+        parsed = parse_args(commands);//parsing user input into commands and flags
+    
+        //making the kid do the work
+        int mom = getpid();
+        int child = fork();
+        if (getpid() == mom){//if it's the parent
+    
+            int status;
+            int childPID = wait(&status);
+            if (status){
+              printf("my son %d is done\n", WEXITSTATUS(status));// doesn't work except for
+              // the things that don't work for this like exit and cd (works when it fails lol)
+              // is this supposed to happen
+            }
+        }
+        else{//don't let the ! mislead you; this means it's a child
+            execvp(parsed[0], parsed);
+            return getpid();
+        }
     }
     return 0;
 }
