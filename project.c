@@ -14,7 +14,7 @@
 // check out the chdir() function
 
 char ** parse_args( char * line ){
-    char ** output = (char**)calloc(10, sizeof("ugaediwbdhadkhwd"));
+    char ** output = (char**)calloc(15, sizeof("ugaediwbdhadkhwd"));
     int i=0;
     while (line){
         char * str = strsep(&line," ");
@@ -24,34 +24,31 @@ char ** parse_args( char * line ){
     return output;
 }
 
-// int main(){
-    // char line[30] = "ls -a -l";
-    // char ** commands = parse_args(line);
-    // execvp(commands[0], commands);
-// }
-
-// int main(int argc, char **argv){
-//     int ancestor = getpid();
-//     int child = fork();
-//     if (getpid() == ancestor){//ancestor
-//         int status;
-//         int childPID = wait(&status);
-//         if (status){
-//           printf("child is done");
-//         }
-//     }
-//     if (!child){//don't let this fool you! this means it IS a child
-//         execvp(argv[1], argv+1);
-//     }
-// }
-
 int main(){
-    char* commands;
-    printf("Should be the current directory lol: ");
+    char* commands = (char*)calloc(30,10);//when in doubt, calloc is always the answer
+    //taking user input
+    printf("should be the current directory lol: ");
     fgets(commands, 30, stdin); 
-    commands[strlen(commands)-1]=0;
+    commands[strlen(commands)-1]=0;//taking out the new line by replacing it with null
 
-    char ** parsed = parse_args(commands);
-    execvp(parsed[0], parsed);
+    char** parsed = (char**)calloc(3, 10);//yes
+    parsed = parse_args(commands);//parsing user input into commands and flags
+
+    //making the kid do the work
+    int mom = getpid();
+    int child = fork();
+    if (getpid() == mom){//if it's the parent
+        int status;
+        int childPID = wait(&status);
+        if (status){
+          printf("my son %d is done\n", WEXITSTATUS(status));// doesn't work except for
+          // the things that don't for this like exit and cd (works when it fails lol)
+          // is this supposed to happen
+        }
+    }
+    else{//don't let the ! mislead you; this means it's a child
+        execvp(parsed[0], parsed);
+        return getpid();
+    }
     return 0;
 }
