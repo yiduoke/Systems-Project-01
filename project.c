@@ -11,7 +11,7 @@
 // (done)then it should read the next command.
 // Note: exit and cd cannot be run through a forked child process, 
 // you will have to implement these commands on your own.
-// check out the chdir() function
+// (done)check out the chdir() function
 
 char ** parse_args( char * line ){
     char ** output = (char**)calloc(15, sizeof("ugaediwbdhadkhwd"));
@@ -55,9 +55,14 @@ int main(){
     
         char** parsed = (char**)calloc(3, 10);//yes
         parsed = parse_args(commands);//parsing user input into commands and flags
-        //cd doesn't work in child processes
+
         //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-        chdir(parsed[1]);
+        chdir(parsed[1]);//cd doesn't work in child processes
+        //so I gotta do it in parent process
+
+        if (!strncmp("exit",parsed[0],4)){//exit doesn't work in child processes
+            exit(1);//so I gotta do it in parent process
+        }
     
         //making the kid do the work
         int mom = getpid();
