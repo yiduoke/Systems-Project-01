@@ -13,17 +13,42 @@
 // you will have to implement these commands on your own.
 // check out the chdir() function
 
-int main(int argc, char **argv){
-    int ancestor = getpid();
-    int child = fork();
-    if (getpid() == ancestor){//ancestor
-        int status;
-        int childPID = wait(&status);
-        if (status){
-          printf("child is done");
-        }
+char ** parse_args( char * line ){
+    char ** output = (char**)calloc(5, sizeof("ugaediwbdhadkhwd"));
+    int i=0;
+    while (line){
+        char * str = strsep(&line," ");
+        output[i]= str;
+        i++;
     }
-    if (!child){//don't let this fool you! this means it IS a child
-        execvp(argv[1], argv+1);
-    }
+    return output;
+}
+
+// int main(){
+//     char line[30] = "ls -a -l";
+//     char ** commands = parse_args(line);
+//     execvp(commands[0], commands);
+// }
+
+// int main(int argc, char **argv){
+//     int ancestor = getpid();
+//     int child = fork();
+//     if (getpid() == ancestor){//ancestor
+//         int status;
+//         int childPID = wait(&status);
+//         if (status){
+//           printf("child is done");
+//         }
+//     }
+//     if (!child){//don't let this fool you! this means it IS a child
+//         execvp(argv[1], argv+1);
+//     }
+// }
+
+int main(){
+    char commands[30];
+    printf("Should be the current directory lol: ");
+    fgets(commands, 30, stdin); 
+    printf("Your command was: %s", commands);
+    return 0;
 }
