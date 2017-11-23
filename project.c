@@ -8,7 +8,7 @@
 // (done)Read a line at a time, parse the line to separate the command from its arguments. 
 // (done)It should then fork and exec the command. 
 // (done)The parent process should wait until the exec'd program exits and 
-// then it should read the next command.
+// (done)then it should read the next command.
 // Note: exit and cd cannot be run through a forked child process, 
 // you will have to implement these commands on your own.
 // check out the chdir() function
