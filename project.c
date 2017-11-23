@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/wait.h>
 
-// Read a line at a time, parse the line to separate the command from its arguments. 
+// (done)Read a line at a time, parse the line to separate the command from its arguments. 
 // It should then fork and exec the command. 
 // The parent process should wait until the exec'd program exits and 
 // then it should read the next command.
@@ -14,5 +14,16 @@
 // check out the chdir() function
 
 int main(int argc, char **argv){
-    execvp(argv[1], argv+1);
+    int ancestor = getpid();
+    int child = fork();
+    if (getpid() == ancestor){//ancestor
+        int status;
+        int childPID = wait(&status);
+        if (status){
+          printf("child is done");
+        }
+    }
+    if (!child){//don't let this fool you! this means it IS a child
+        execvp(argv[1], argv+1);
+    }
 }
