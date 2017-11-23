@@ -14,7 +14,7 @@
 // check out the chdir() function
 
 char ** parse_args( char * line ){
-    char ** output = (char**)calloc(5, sizeof("ugaediwbdhadkhwd"));
+    char ** output = (char**)calloc(10, sizeof("ugaediwbdhadkhwd"));
     int i=0;
     while (line){
         char * str = strsep(&line," ");
@@ -25,9 +25,9 @@ char ** parse_args( char * line ){
 }
 
 // int main(){
-//     char line[30] = "ls -a -l";
-//     char ** commands = parse_args(line);
-//     execvp(commands[0], commands);
+    // char line[30] = "ls -a -l";
+    // char ** commands = parse_args(line);
+    // execvp(commands[0], commands);
 // }
 
 // int main(int argc, char **argv){
@@ -46,9 +46,12 @@ char ** parse_args( char * line ){
 // }
 
 int main(){
-    char commands[30];
+    char* commands;
     printf("Should be the current directory lol: ");
     fgets(commands, 30, stdin); 
-    printf("Your command was: %s", commands);
+    commands[strlen(commands)-1]=0;
+
+    char ** parsed = parse_args(commands);
+    execvp(parsed[0], parsed);
     return 0;
 }
