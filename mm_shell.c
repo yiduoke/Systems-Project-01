@@ -37,20 +37,6 @@ static void sighandler(int signo){
   }
 }
 
-void run_command(char * command){
-  char** arguments = (char**)calloc(10, sizeof(char *));//yes
-  arguments = parse_args(command, " ");//parsing user input into commands and flags
-  //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-  chdir(arguments[1]);//cd doesn't work in child processes
-  //so I gotta do it in parent process
-
-  if (!strncmp("exit",arguments[0],4)){//exit doesn't work in child processes
-    exit(1);//so I gotta do it in parent process
-  }
-
-  execvp(arguments[0], arguments);
-}
-
 int main(){
   signal(SIGINT, sighandler);//whenever the SIGNIT gets sent, RUN this function
   signal(SIGUSR1, sighandler);
@@ -80,6 +66,16 @@ int main(){
       //making the kid do the work
       int mom = getpid();
       int child = fork();
+
+      char** arguments = (char**)calloc(10, sizeof(char *));//yes
+      arguments = parse_args(commands[i], " ");//parsing user input into commands and flags
+      //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
+      chdir(arguments[1]);//cd doesn't work in child processes
+      //so I gotta do it in parent process
+      if (!strncmp("exit",arguments[0],4)){//exit doesn't work in child processes
+	exit(1);//so I gotta do it in parent process
+      }
+      
       if (getpid() == mom){//if it's the parent
 	int status;
 	int childPID = wait(&status);
@@ -88,7 +84,7 @@ int main(){
 	// }
       }
       else{
-	run_command(commands[i]);
+	execvp(arguments[0], arguments);
 	return getpid();
       }
       i++;
