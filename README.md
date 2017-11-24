@@ -14,7 +14,7 @@ Bugs:
 	
 Files & Function Headers:
 
-parse.c
+mm_shell.c
 	
 Our first, Our last, Our everything.
 	
@@ -23,14 +23,13 @@ Our first, Our last, Our everything.
         	  char delimeter
 	Returns: Array of strings separated by delimiter
 
-	<explanation TBA>
 	====================*/
 
 	/*======== static void sighandler() ==========
 	Inputs:  int signo
 	Returns: nothing
 
-	<explanation TBA>
+	handles user signal
 	====================*/
 
 	/*======== int main() ==========
@@ -38,4 +37,5 @@ Our first, Our last, Our everything.
 	Returns: 0
 
 	executes the commands
+	does everything basically
 	====================*/
