@@ -1,4 +1,4 @@
-all project.c
+all: project.c
 	gcc project.c
 
 clean:

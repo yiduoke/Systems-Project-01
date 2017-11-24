@@ -17,7 +17,7 @@
 // Read and separate multiple commands on one line with ; 
 
 char ** parse_args( char * line ){
-    char ** output = (char**)calloc(15, sizeof("ugaediwbdhadkhwd"));
+    char ** output = (char**)calloc(40, sizeof("ugaediwbdhadkhwd"));
     int i=0;
     while (line){
         char * str = strsep(&line," ");
@@ -40,9 +40,8 @@ int main(){
     signal(SIGINT, sighandler);//whenever the SIGNIT gets sent, RUN this function
     signal(SIGUSR1, sighandler);
     while(1){
-        char* commands = (char*)calloc(30,10);//when in doubt, calloc is always the answer
-        //taking user input
-        // printf("should be the current directory lol: ");
+        char* commands = (char*)calloc(40,10);//when in doubt, calloc is always the answer
+        
         //prints current working directory
         char cwd[1024];
         if (getcwd(cwd, sizeof(cwd)) != NULL){
@@ -53,10 +52,11 @@ int main(){
             perror("getcwd() error");
         }
 
+        //taking user input
         fgets(commands, 30, stdin); 
         commands[strlen(commands)-1]=0;//taking out the new line by replacing it with null
     
-        char** parsed = (char**)calloc(3, 10);//yes
+        char** parsed = (char**)calloc(40, 10);//yes
         parsed = parse_args(commands);//parsing user input into commands and flags
 
         //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
@@ -68,18 +68,37 @@ int main(){
         }
     
         //making the kid do the work
-        int mom = getpid();
+        // int mom = getpid();
         int child = fork();
-        if (getpid() == mom){//if it's the parent
-    
+        if (child){//if it's the parent
             int status;
             int childPID = wait(&status);
-            // if (status){
-            //   printf("prolly typed exit, which doesn't work yet lol");
-            // }
         }
         else{
-            execvp(parsed[0], parsed);
+            // execvp(parsed[0], parsed);
+            int i=0;
+            while (parsed[i]){
+                int son = fork();
+                printf("son %d\n", son);
+                int current = 0;
+                if (!son){
+                    printf("im a son");
+                    char ** section = (char**)calloc(40, sizeof("ugaediwbdhadkhwd"));
+                    int start = 0;
+                    current = 0;
+                    while (strcmp(";", parsed[current])){
+                        current++;
+                    }
+                    memcpy(section, parsed+start, current);
+                    printf("string %s", section[0]);
+                    execvp(section[0], section);
+                }
+                else{
+                    printf("not a son\n");
+                }
+                i+=2;
+            }
+
             return getpid();
         }
     }
