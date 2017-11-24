@@ -3,10 +3,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/wait.h>
 
-// (done)Read a line at a time, parse the line to separate the command from its arguments. 
-// (done)It should then fork and exec the command. 
+// (done)Read a line at a time, parse the line to separate the command from its arguments.
+// (done)It should then fork and exec the command.
 // (done)The parent process should wait until the exec'd program exits and 
 // (done)then it should read the next command.
 // (done)Note: exit and cd cannot be run through a forked child process, 
@@ -16,77 +17,81 @@
 
 // (done)Read and separate multiple commands on one line with ; 
 
-char ** parse_args(char *line, char* delimeter ){
-  char ** output = (char**)calloc(15, sizeof(char *));
-  int i=0;
-  while (line){
-    char * str = strsep(&line, delimeter);
-    output[i]= str;
-    i++;
-  }
-  return output;
+char **parse_string(char * line, char *delimeter){
+  char **args = (char**)calloc(10, sizeof(char *));
+  int i = 0;
+  while(line) args[i++]= strsep(&line, delimeter);
+  
+  return args;
 }
 
 static void sighandler(int signo){
   if (signo == SIGINT){//keyboard interrupt
-      
+    printf("\n[pid %d]program exited due to an interrupt signal\n", getpid());
     exit(0);
   }
-  else if (signo == SIGUSR1){//keyboard interrupt
-    printf("hello, my mom is %d\n", getppid());
+}
+
+void print_prompt(){
+  char cwd[1024];
+  getcwd(cwd, sizeof(cwd)) ? fprintf(stdout, "m&m shell:%s$ ", cwd) : perror("getcwd() error");
+}
+
+char *get_input(){
+  //taking user input
+  char *input = (char *)calloc(1024, 1);//when in doubt, calloc is always the answer
+  fgets(input, 100, stdin); 
+  input[strlen(input)-1]=0;//taking out the new line by replacing it with null
+
+  return input;
+}
+
+char ** parse_input(char *input){
+  char** commands = (char**)calloc(10, sizeof(char *));//yes
+  commands = parse_string(input, ";");//parsing user input into commands and flags
+}
+
+void run_command(char *command){
+  char** arguments = (char**)calloc(10, sizeof(char *));//yes
+  arguments = parse_string(command, " ");//parsing user input into commands and flags
+  
+  if (!strncmp("exit", arguments[0], 4)) exit(1); //exit doesn't work in child processes so I gotta do it in parent process
+  //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
+  if (!strncmp("cd", arguments[0], 4)) chdir(arguments[1]); //cd doesn't work in child processes so I gotta do it in parent process
+
+  //making the kid do the work
+  int fork_pid = fork();
+  //fork error detection
+  if(fork_pid == -1){
+    printf("fork failed: %s\n", strerror(errno));
+    exit(-1);
+  }
+  
+  if (fork_pid){//if it's the parent
+    int status;
+    int child_pid = wait(&status);
+  }
+  else{
+    execvp(arguments[0], arguments);
+  }
+}
+
+void run_commands(){
+  char **commands = parse_input(get_input());
+
+  int i = 0;
+  for( ; commands[i] && i <= 10; i++){
+    run_command(commands[i]);
   }
 }
 
 int main(){
-  signal(SIGINT, sighandler);//whenever the SIGNIT gets sent, RUN this function
-  signal(SIGUSR1, sighandler);
-  
   while(1){
-    char* input = (char*)calloc(30,10);//when in doubt, calloc is always the answer
-  
-    //prints current working directory
-    //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL){
-      fprintf(stdout, "m&m shell: %s", cwd);
-      printf("$ ");
-    }
-    else{
-      perror("getcwd() error");
-    }
+    signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
     
-    //taking user input
-    fgets(input, 100, stdin); 
-    input[strlen(input)-1]=0;//taking out the new line by replacing it with null
-    
-    char** commands = (char**)calloc(10, sizeof(char *));//yes
-    commands = parse_args(input, ";");//parsing user input into separate commands
-
-    int i = 0;
-    while(commands[i] && i <= 10){
-      //making the kid do the work
-      int mom = getpid();
-      int child = fork();
-
-      char** arguments = (char**)calloc(10, sizeof(char *));//yes
-      arguments = parse_args(commands[i], " ");//parsing user input into commands and flags
-      
-      chdir(arguments[1]);//cd doesn't work in child processes
-      //so I gotta do it in parent process
-      if (!strncmp("exit",arguments[0],4)){//exit doesn't work in child processes
-        exit(1);//so I gotta do it in parent process
-      }
-      
-      if (getpid() == mom){//if it's the parent
-	      int status;
-        int childPID = wait(&status);
-      }
-      else{
-	      execvp(arguments[0], arguments);
-	      return getpid();
-      }
-      i++;
-    }
+    print_prompt();
+    run_commands();
   }
+
   return 0;
 }
