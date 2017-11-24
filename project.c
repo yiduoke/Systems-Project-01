@@ -47,22 +47,8 @@ void run_command(char * command){
   if (!strncmp("exit",arguments[0],4)){//exit doesn't work in child processes
     exit(1);//so I gotta do it in parent process
   }
-    
-  //making the kid do the work
-  int mom = getpid();
-  int child = fork();
-  if (getpid() == mom){//if it's the parent
-    
-    int status;
-    int childPID = wait(&status);
-    // if (status){
-    //   printf("prolly typed exit, which doesn't work yet lol");
-    // }
-  }
-  else{
-    execvp(arguments[0], arguments);
-    return getpid();
-  }
+
+  execvp(arguments[0], arguments);
 }
 
 int main(){
@@ -91,8 +77,20 @@ int main(){
 
     int i = 0;
     while(commands[i] && i <= 10){
-      printf("command: %s\n", commands[i]);
-      run_command(commands[i]);
+      //making the kid do the work
+      int mom = getpid();
+      int child = fork();
+      if (getpid() == mom){//if it's the parent
+	int status;
+	int childPID = wait(&status);
+	// if (status){
+	//   printf("prolly typed exit, which doesn't work yet lol");
+	// }
+      }
+      else{
+	run_command(commands[i]);
+	return getpid();
+      }
       i++;
     }
   }
