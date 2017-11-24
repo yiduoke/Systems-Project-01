@@ -75,29 +75,7 @@ int main(){
             int childPID = wait(&status);
         }
         else{
-            // execvp(parsed[0], parsed);
-            int i=0;
-            while (parsed[i]){
-                int son = fork();
-                printf("son %d\n", son);
-                int current = 0;
-                if (!son){
-                    printf("im a son");
-                    char ** section = (char**)calloc(40, sizeof("ugaediwbdhadkhwd"));
-                    int start = 0;
-                    current = 0;
-                    while (strcmp(";", parsed[current])){
-                        current++;
-                    }
-                    memcpy(section, parsed+start, current);
-                    printf("string %s", section[0]);
-                    execvp(section[0], section);
-                }
-                else{
-                    printf("not a son\n");
-                }
-                i+=2;
-            }
+            execvp(parsed[0], parsed);
 
             return getpid();
         }
