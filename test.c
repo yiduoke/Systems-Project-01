@@ -35,11 +35,11 @@ int main(){
     char** parsed = (char**)calloc(40, 10);//yes
     parsed = parse_commands(commands);
     int i=0;
+    char** further = (char**)calloc(40, 10);//yes
     while (parsed[i]){
         printf("beginning|%s|end\n", parsed[i]);
-        char** further = (char**)calloc(40, 10);//yes
-        further = parse_args(parsed[i]);
-        int j=0;
+        memcpy(further+i, parse_args(parsed[i]), sizeof(parse_args(parsed[i])));
+        int j=i;
         while (further[j]){
             printf("further %d: %s\n", j, further[j]);
             j++;
@@ -48,5 +48,10 @@ int main(){
     }
 
     printf("------");
+    int index=0;
+    while (further[index]){
+        printf("further at %d: %s\n", index, further[index]);
+        index++;
+    }
 
 }
