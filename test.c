@@ -7,15 +7,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
-void duplicate(char file[60]){
-    int stdout_bk = dup(fileno(stdout));//is fd for stdout backup
-    int fd = open(file, O_CREAT | O_RDWR | O_TRUNC, 0644); 
-    dup2(fd, fileno(stdout));
-}
-
 int main(){
-   duplicate("newfile");
-
-   printf("LAST THING IN STDOUT\n");
-   return 0;
+   FILE* fp;
+   fp = popen("ls -l","r");
+//    char path[10];
+//    while (fgets(path, 10, fp) != NULL){}
+//    printf("path: %s\n", path);
 }
