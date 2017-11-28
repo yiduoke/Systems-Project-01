@@ -85,13 +85,22 @@ void run_commands(){
   }
 }
 
+void redirect(char *command, char *file){
+  int stdout_bk = dup(fileno(stdout));//is fd for stdout backup
+  int fd = open(file, O_CREAT | O_RDWR | O_TRUNC, 0644); 
+  dup2(fd, fileno(stdout));
+  run_command(command);
+}
+
 int main(){
-  while(1){
-    signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
+  char cm[30] = "cat test.c";
+  redirect(cm, "newfile");
+  // while(1){
+  //   signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
     
-    print_prompt();
-    run_commands();
-  }
+  //   print_prompt();
+  //   run_commands();
+  // }
 
   return 0;
 }
