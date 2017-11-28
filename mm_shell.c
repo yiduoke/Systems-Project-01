@@ -17,7 +17,7 @@
 
 // (done)Read and separate multiple commands on one line with ; 
 
-char **parse_string(char * line, char *delimeter){
+char **parse_string(char *line, char *delimeter){
   char **args = (char**)calloc(10, sizeof(char *));
   int i = 0;
   while(line) args[i++]= strsep(&line, delimeter);
@@ -46,19 +46,34 @@ char *get_input(){
   return input;
 }
 
-char ** parse_input(char *input){
-  char** commands = (char**)calloc(10, sizeof(char *));//yes
-  commands = parse_string(input, ";");//parsing user input into commands and flags
+void redirect(char *file, int *backup, int old_fd){
+  *backup = dup(old_fd);
+  int fd = open(file, O_RDWR | O_CREAT, 0666);
+  dup2(fd, old_fd);
+  close(fd);
 }
 
 void run_command(char *command){
+  int backup, old_fd;
+  
+  if(strchr(command, '>')){
+    char **args = parse_string(command, ">");
+    old_fd = STDOUT_FILENO;
+    redirect(args[1], &backup, old_fd);
+  }
+  if(strchr(command, '<')){
+    char **args = parse_string(command, "<");
+    old_fd = STDIN_FILENO;
+    redirect(args[1], &backup, old_fd);
+  }
+  
   char** arguments = (char**)calloc(10, sizeof(char *));//yes
   arguments = parse_string(command, " ");//parsing user input into commands and flags
   
   if (!strncmp("exit", arguments[0], 4)) exit(1); //exit doesn't work in child processes so I gotta do it in parent process
   //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
   if (!strncmp("cd", arguments[0], 4)) chdir(arguments[1]); //cd doesn't work in child processes so I gotta do it in parent process
-
+  
   //making the kid do the work
   int fork_pid = fork();
   //fork error detection
@@ -74,10 +89,12 @@ void run_command(char *command){
   else{
     execvp(arguments[0], arguments);
   }
+
+  if(backup) dup2(backup, old_fd);
 }
 
 void run_commands(){
-  char **commands = parse_input(get_input());
+  char **commands = parse_string(get_input(), ";");
 
   int i = 0;
   for( ; commands[i] && i <= 10; i++){
@@ -85,22 +102,13 @@ void run_commands(){
   }
 }
 
-void redirect(char *command, char *file){
-  int stdout_bk = dup(fileno(stdout));//is fd for stdout backup
-  int fd = open(file, O_CREAT | O_RDWR | O_TRUNC, 0644); 
-  dup2(fd, fileno(stdout));
-  run_command(command);
-}
-
 int main(){
-  char cm[30] = "cat test.c";
-  redirect(cm, "newfile");
-  // while(1){
-  //   signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
+  while(1){
+    signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
     
-  //   print_prompt();
-  //   run_commands();
-  // }
+    print_prompt();
+    run_commands();
+  }
 
   return 0;
 }
