@@ -48,7 +48,7 @@ char *get_input(){
 
 void redirect(char *file, int *backup, int old_fd){
   *backup = dup(old_fd);
-  int fd = open(file, O_RDWR | O_CREAT | O_TRUNC, 0666);
+  int fd = open(file, O_RDWR | O_CREAT, 0666);
   dup2(fd, old_fd);
   close(fd);
 }
