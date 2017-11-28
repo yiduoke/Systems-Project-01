@@ -17,7 +17,7 @@
 
 // (done)Read and separate multiple commands on one line with ; 
 
-char **parse_string(char * line, char *delimeter){
+char **parse_string(char *line, char *delimeter){
   char **args = (char**)calloc(10, sizeof(char *));
   int i = 0;
   while(line) args[i++]= strsep(&line, delimeter);
@@ -46,11 +46,27 @@ char *get_input(){
   return input;
 }
 
+void redirect(char *file, int *backup, int old_fd){
+  *backup = dup(old_fd);
+  int fd = open(file, O_RDWR | O_CREAT | O_TRUNC, 0666);
+  dup2(fd, old_fd);
+  close(fd);
+}
+
 void run_command(char *command){
-  /* char *command1 = parse_string(command, ">"); */
-  /* if(command){ */
-  /*   redirect(command1, command); */
-  /* } */
+  int backup, old_fd;
+  
+  if(strchr(command, '>')){
+    char **args = parse_string(command, ">");
+    old_fd = STDOUT_FILENO;
+    redirect(args[1], &backup, old_fd);
+  }
+  if(strchr(command, '<')){
+    char **args = parse_string(command, "<");
+    old_fd = STDIN_FILENO;
+    redirect(args[1], &backup, old_fd);
+  }
+  
   char** arguments = (char**)calloc(10, sizeof(char *));//yes
   arguments = parse_string(command, " ");//parsing user input into commands and flags
   
@@ -73,6 +89,8 @@ void run_command(char *command){
   else{
     execvp(arguments[0], arguments);
   }
+
+  if(backup) dup2(backup, old_fd);
 }
 
 void run_commands(){
@@ -84,33 +102,13 @@ void run_commands(){
   }
 }
 
-void redirect(char *command, char *file){
-  int stdout_backup = dup(STDOUT_FILENO);
-  int fd = open(file, O_RDWR | O_CREAT, 0644);
-  dup2(fd, STDOUT_FILENO);
-  //run_command(command);
-  printf("writing\n");
-  dup2(stdout_backup, STDOUT_FILENO);
-  printf("done\n");
-}
-
 int main(){
-  int stdout_backup = dup(STDOUT_FILENO);
-  int fd = open("newfile", O_RDWR | O_CREAT, 0666);
-  dup2(fd, STDOUT_FILENO);
-  //run_command(command);
-  close(fd);
-  printf("writing\n");
-  close(STDOUT_FILENO);
-  dup2(stdout_backup, STDOUT_FILENO);
-  close(stdout_backup);
-  printf("done1\n");
-  /* while(1){ */
-  /*   signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function */
+  while(1){
+    signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
     
-  /*   print_prompt(); */
-  /*   run_commands(); */
-  /* } */
+    print_prompt();
+    run_commands();
+  }
 
   return 0;
 }
