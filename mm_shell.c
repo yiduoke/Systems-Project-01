@@ -118,7 +118,9 @@ void run_command(char *command){
       int child_pid = wait(&status);
     }
     else{
-      execvp(arguments[0], arguments);
+      if(execvp(arguments[0], arguments)<0){
+        printf("your command was invalid\n");
+      }
     }
   }
   if(backup) dup2(backup, old_fd);
