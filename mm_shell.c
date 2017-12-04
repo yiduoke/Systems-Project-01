@@ -72,22 +72,12 @@ void pipe_commands(char* cmd1, char* cmd2){
 void run_command(char *command){
   int backup, old_fd;
 
-  if(strstr(command, ">>")){
-    char **args = parse_string(command, ">>");
-    old_fd = STDOUT_FILENO;
-    redirectAppend(args[1], &backup, old_fd);
-  }
-  if(strstr(command, "<<")){
-    char **args = parse_string(command, "<<");
-    old_fd = STDIN_FILENO;
-    redirectAppend(args[1], &backup, old_fd);
-  }
-  else if(strchr(command, '>')){
+  if(strchr(command, '>')){
     char **args = parse_string(command, ">");
     old_fd = STDOUT_FILENO;
     redirect(args[1], &backup, old_fd);
   }
-  else if(strchr(command, '<')){
+  if(strchr(command, '<')){
     char **args = parse_string(command, "<");
     old_fd = STDIN_FILENO;
     redirect(args[1], &backup, old_fd);
