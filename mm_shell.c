@@ -176,7 +176,7 @@ void run_command(char *command){
     
     if (!strncmp("exit", arguments[0], 4)) exit(1); //exit doesn't work in child processes so I gotta do it in parent process
     //courtesy of https://stackoverflow.com/questions/298510/how-to-get-the-current-directory-in-a-c-program
-    else if (!strncmp("cd", arguments[0], 4)) chdir(arguments[1]); //cd doesn't work in child processes so I gotta do it in parent process
+    else if (!strncmp("cd", arguments[0], 2)) chdir(arguments[1]); //cd doesn't work in child processes so I gotta do it in parent process
     else{
       //making the kid do the work
       int fork_pid = fork();
