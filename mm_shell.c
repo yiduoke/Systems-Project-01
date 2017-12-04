@@ -15,7 +15,7 @@ returns:
 - pointer to array of pointers to each parsed argument
 
 use:
-parses the line, a string, using given delimeter, also a string
+- parses the line, a string, using given delimeter, also a string
 */
 char **parse_string(char *line, char *delimeter){
   char **args = (char**)calloc(10, sizeof(char *));
@@ -33,7 +33,7 @@ returns:
 - none
 
 use:
-handles the case in which someone wants to kill our shell with an interrupt signal
+- handles the case in which someone wants to kill our shell with an interrupt signal
 */
 static void sighandler(int signo){
   if (signo == SIGINT){//keyboard interrupt
@@ -51,7 +51,7 @@ returns:
 - none
 
 use:
-just prints the current directory's path like the bash does
+- just prints the current directory's path like the bash does
 */
 void print_prompt(){
   char cwd[1024];
@@ -66,13 +66,13 @@ returns:
 - pointer to string of cleaned input 
 
 use:
-cleanses user input (takes out the new line because fgets reads that in)
+- cleanses user input (takes out the new line because fgets reads that in)
 */
 char *get_input(){
   //taking user input
   char *input = (char *)calloc(1024, 1);//when in doubt, calloc is always the answer
   fgets(input, 100, stdin); 
-  //input[strlen(input)-1]=0;//taking out the new line by replacing it with null
+  input[strlen(input)-1]=0;//taking out the new line by replacing it with null
 
   return input;
 }
@@ -87,7 +87,7 @@ returns:
 - none
 
 use:
-handles redirections with > or <
+- handles redirections with > or <
 */
 void redirect(char *file, int *backup, int old_fd){
   *backup = dup(old_fd);
@@ -106,7 +106,7 @@ returns:
 - none
 
 use:
-runs command cmd2 using outputs of command cmd1
+- runs command cmd2 using outputs of command cmd1
 */
 void pipe_commands(char* cmd1, char* cmd2){
   FILE* fp;
@@ -128,7 +128,7 @@ returns:
 - none
 
 use:
-runs a single command
+- runs a single command
 */
 void run_command(char *command){
   int backup, old_fd;
@@ -183,10 +183,10 @@ returns:
 - none
 
 use:
-gets user inputs, cleans them into recognizable commands, and runs them
-Semicolons have to be immediately next to commands -- no ls ; pwd
-only ls;pwd for now
-handles up to 10 commands on one line for now
+- gets user inputs, cleans them into recognizable commands, and runs them
+- Semicolons have to be immediately next to commands -- no ls ; pwd
+- only ls;pwd for now
+- handles up to 10 commands on one line for now
 */
 void run_commands(){
   char **commands = parse_string(get_input(), ";");
@@ -205,7 +205,7 @@ returns:
 - the int 0
 
 use:
-executes our shell
+- executes our shell
 */
 int main(){
   while(1){
