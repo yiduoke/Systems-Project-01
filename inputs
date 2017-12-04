@@ -1,1 +1,1 @@
-ls -a -a -a -a -a -a -a -a;exit
+ls -a -a -a -a -a -a -a -a -l -a -a -a -r;pwd;exit

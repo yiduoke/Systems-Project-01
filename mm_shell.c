@@ -18,11 +18,11 @@ use:
 - counts how many tokens are in a line
 */
 
-int count_tokens(char *line, char delimeter){
+int count_tokens(char *line, char *delimeter){
   int i;
   char *tmp = line;
 
-  for(i = 1; tmp = strchr(++tmp, delimeter); i++){}
+  for(i = 1; tmp = strchr(++tmp, delimeter[0]); i++){}
   
   return i;
 }
@@ -39,7 +39,7 @@ use:
 - parses the line, a string, using given delimeter, also a string
 */
 char **parse_string(char *line, char *delimeter){
-  char **args = (char**)calloc(count_tokens(line, *delimeter), sizeof(char *));
+  char **args = (char**)calloc(count_tokens(line, delimeter)+1, sizeof(char *));
   int i = 0;
   while(line) args[i++]= strsep(&line, delimeter);
   
@@ -91,8 +91,8 @@ use:
 */
 char *get_input(){
   //taking user input
-  char *input = (char *)calloc(1024, 1);//when in doubt, calloc is always the answer
-  fgets(input, 100, stdin); 
+  char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
+  fgets(input, 1000, stdin); 
   input[strlen(input)-1]=0;//taking out the new line by replacing it with null
 
   return input;
@@ -171,7 +171,7 @@ void run_command(char *command){
   }
   else{
     //printf("tokens: %d\n", count_tokens(command, ' '));
-    char** arguments = (char**)calloc(10, sizeof(char *));//yes
+    char** arguments = (char**)calloc(count_tokens(command, " "), sizeof(char *));//yes
     arguments = parse_string(command, " ");//parsing user input into commands and flags
     
     if (!strncmp("exit", arguments[0], 4)) exit(1); //exit doesn't work in child processes so I gotta do it in parent process
@@ -212,11 +212,11 @@ use:
 */
 void run_commands(){
   char *input = get_input();
-  //int num_tokens = count_tokens(input, ';');
+  int num_tokens = count_tokens(input, ";");
   char **commands = parse_string(input, ";");
 
   int i;
-  for(i = 0; commands[i] && i < 10; i++){
+  for(i = 0; commands[i] && i < num_tokens; i++){
     run_command(commands[i]);
   }
 }
