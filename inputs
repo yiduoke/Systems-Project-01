@@ -1,1 +1,1 @@
-ls -l; pwd
+ls -l; pwd;exit
