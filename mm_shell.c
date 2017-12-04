@@ -42,7 +42,15 @@ char *get_input(){
 // handles redirections with > or <
 void redirect(char *file, int *backup, int old_fd){
   *backup = dup(old_fd);
-  int fd = open(file, O_RDWR | O_CREAT, 0666);
+  int fd = open(file, O_RDWR | O_CREAT, 0644);
+  dup2(fd, old_fd);
+  close(fd);
+}
+
+// handles redirections with >> or <<
+void redirectAppend(char *file, int *backup, int old_fd){
+  *backup = dup(old_fd);
+  int fd = open(file, O_RDWR | O_CREAT | O_APPEND, 0644);
   dup2(fd, old_fd);
   close(fd);
 }
@@ -63,13 +71,23 @@ void pipe_commands(char* cmd1, char* cmd2){
 // run a single command
 void run_command(char *command){
   int backup, old_fd;
-  
-  if(strchr(command, '>')){
+
+  if(strstr(command, ">>")){
+    char **args = parse_string(command, ">>");
+    old_fd = STDOUT_FILENO;
+    redirectAppend(args[1], &backup, old_fd);
+  }
+  if(strstr(command, "<<")){
+    char **args = parse_string(command, "<<");
+    old_fd = STDIN_FILENO;
+    redirectAppend(args[1], &backup, old_fd);
+  }
+  else if(strchr(command, '>')){
     char **args = parse_string(command, ">");
     old_fd = STDOUT_FILENO;
     redirect(args[1], &backup, old_fd);
   }
-  if(strchr(command, '<')){
+  else if(strchr(command, '<')){
     char **args = parse_string(command, "<");
     old_fd = STDIN_FILENO;
     redirect(args[1], &backup, old_fd);
