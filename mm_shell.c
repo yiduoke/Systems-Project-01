@@ -6,7 +6,17 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-// parses the line, a string, using given delimeter, also a string
+/*
+args:
+- char *line: a command-line command
+- char *delimeter: the delimeter by which to separate arguments
+
+returns:
+- pointer to array of pointers to each parsed argument
+
+use:
+parses the line, a string, using given delimeter, also a string
+*/
 char **parse_string(char *line, char *delimeter){
   char **args = (char**)calloc(10, sizeof(char *));
   int i = 0;
@@ -15,7 +25,16 @@ char **parse_string(char *line, char *delimeter){
   return args;
 }
 
-// in case someone wants to kill our shell with signal of number signo
+/*
+args:
+- int signo: number of the signal
+
+returns:
+- none
+
+use:
+handles the case in which someone wants to kill our shell with an interrupt signal
+*/
 static void sighandler(int signo){
   if (signo == SIGINT){//keyboard interrupt
     printf("\n[pid %d]program exited due to an interrupt signal\n", getpid());
@@ -23,31 +42,72 @@ static void sighandler(int signo){
   }
 }
 
-// just prints the current directory like the bash does
+
+/*
+args:
+- none
+
+returns:
+- none
+
+use:
+just prints the current directory's path like the bash does
+*/
 void print_prompt(){
   char cwd[1024];
   getcwd(cwd, sizeof(cwd)) ? fprintf(stdout, "m&m shell:%s$ ", cwd) : perror("getcwd() error");
 }
 
-// cleanses user input (takes out the new line because fgets reads that in)
+/*
+args:
+- none
+
+returns:
+- pointer to string of cleaned input 
+
+use:
+cleanses user input (takes out the new line because fgets reads that in)
+*/
 char *get_input(){
   //taking user input
   char *input = (char *)calloc(1024, 1);//when in doubt, calloc is always the answer
   fgets(input, 100, stdin); 
-  input[strlen(input)-1]=0;//taking out the new line by replacing it with null
+  //input[strlen(input)-1]=0;//taking out the new line by replacing it with null
 
   return input;
 }
 
-// handles redirections with > or <
+/*
+args:
+- char *file: path for file to redirect into/from
+- int *backup: the delimeter by which to separate arguments
+- int old_fd: the delimeter by which to separate arguments
+
+returns:
+- none
+
+use:
+handles redirections with > or <
+*/
 void redirect(char *file, int *backup, int old_fd){
   *backup = dup(old_fd);
-  int fd = open(file, O_RDWR | O_CREAT, 0666);
+  int fd = open(file, O_RDWR | O_CREAT, 0644);
   dup2(fd, old_fd);
   close(fd);
 }
 
-// runs command cmd2 using outputs of command cmd1
+
+/*
+args:
+- char *cmd1: command to take input from
+- char *cmd2: command to pipe input into
+
+returns:
+- none
+
+use:
+runs command cmd2 using outputs of command cmd1
+*/
 void pipe_commands(char* cmd1, char* cmd2){
   FILE* fp;
   fp = popen(cmd1,"r");
@@ -60,7 +120,16 @@ void pipe_commands(char* cmd1, char* cmd2){
   pclose(new_fp);
 }
 
-// run a single command
+/*
+args:
+- char *command: command to be run
+
+returns:
+- none
+
+use:
+runs a single command
+*/
 void run_command(char *command){
   int backup, old_fd;
   
@@ -106,9 +175,19 @@ void run_command(char *command){
   if(backup) dup2(backup, old_fd);
 }
 
-// run multiple commands. 
-// Semicolons have to be immediately next to commands -- no ls ; pwd
-// only ls;pwd
+/*
+args:
+- none
+
+returns:
+- none
+
+use:
+gets user inputs, cleans them into recognizable commands, and runs them
+Semicolons have to be immediately next to commands -- no ls ; pwd
+only ls;pwd for now
+handles up to 10 commands on one line for now
+*/
 void run_commands(){
   char **commands = parse_string(get_input(), ";");
 
@@ -118,7 +197,16 @@ void run_commands(){
   }
 }
 
-// executes our bash
+/*
+args:
+- none
+
+returns:
+- the int 0
+
+use:
+executes our shell
+*/
 int main(){
   while(1){
     signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
