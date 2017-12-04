@@ -9,6 +9,7 @@ Bugs:
 * only works with single spaces 
 * only handles one >, <, and |, with no space before or after them
 * files with input commands must end with exit
+* arguments inside quotes won't be counted as a single argument
 	
 Files & Function Headers:
 
