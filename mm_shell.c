@@ -6,17 +6,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-// (done)Read a line at a time, parse the line to separate the command from its arguments.
-// (done)It should then fork and exec the command.
-// (done)The parent process should wait until the exec'd program exits and 
-// (done)then it should read the next command.
-// (done)Note: exit and cd cannot be run through a forked child process, 
-// (done)you will have to implement these commands on your own.
-// (done)check out the chdir() function
-// done with 1st feature!!!
-
-// (done)Read and separate multiple commands on one line with ; 
-
+// parses the line, a string, using given delimeter, also a string
 char **parse_string(char *line, char *delimeter){
   char **args = (char**)calloc(10, sizeof(char *));
   int i = 0;
@@ -25,6 +15,7 @@ char **parse_string(char *line, char *delimeter){
   return args;
 }
 
+// in case someone wants to kill our shell with signal of number signo
 static void sighandler(int signo){
   if (signo == SIGINT){//keyboard interrupt
     printf("\n[pid %d]program exited due to an interrupt signal\n", getpid());
@@ -32,11 +23,13 @@ static void sighandler(int signo){
   }
 }
 
+// just prints the current directory like the bash does
 void print_prompt(){
   char cwd[1024];
   getcwd(cwd, sizeof(cwd)) ? fprintf(stdout, "m&m shell:%s$ ", cwd) : perror("getcwd() error");
 }
 
+// cleanses user input (takes out the new line because fgets reads that in)
 char *get_input(){
   //taking user input
   char *input = (char *)calloc(1024, 1);//when in doubt, calloc is always the answer
@@ -46,6 +39,7 @@ char *get_input(){
   return input;
 }
 
+// handles redirections with > or <
 void redirect(char *file, int *backup, int old_fd){
   *backup = dup(old_fd);
   int fd = open(file, O_RDWR | O_CREAT, 0666);
@@ -53,6 +47,7 @@ void redirect(char *file, int *backup, int old_fd){
   close(fd);
 }
 
+// runs command cmd2 using outputs of command cmd1
 void pipe_commands(char* cmd1, char* cmd2){
   FILE* fp;
   fp = popen(cmd1,"r");
@@ -65,6 +60,7 @@ void pipe_commands(char* cmd1, char* cmd2){
   pclose(new_fp);
 }
 
+// run a single command
 void run_command(char *command){
   int backup, old_fd;
   
@@ -110,6 +106,9 @@ void run_command(char *command){
   if(backup) dup2(backup, old_fd);
 }
 
+// run multiple commands. 
+// Semicolons have to be immediately next to commands -- no ls ; pwd
+// only ls;pwd
 void run_commands(){
   char **commands = parse_string(get_input(), ";");
 
@@ -119,10 +118,8 @@ void run_commands(){
   }
 }
 
+// executes our bash
 int main(){
-  // char command1[] = "ls";
-  // char command2[] = "wc";
-  // pipe_commands(command1, command2);
   while(1){
     signal(SIGINT, sighandler);//whenever the SIGINT is sent, RUN this function
     
